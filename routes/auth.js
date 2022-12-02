@@ -69,13 +69,12 @@ app.post("/forgot_password", async (req, res) => {
   }
   const token = await db.Token.create();
   await user.addToken(token);
-  console.log(token.token);
   //TODO: send mail with token and userid
   res.status(200).send("Email Sent!");
 });
 
 app.post("/reset_password", async (req, res) => {
-  const { token, userid } = req.params;
+  const { token, userid } = req.query;
   const { newPassoword, reNewPassword } = req.body;
 
   if (newPassoword !== reNewPassword) {
@@ -85,17 +84,29 @@ app.post("/reset_password", async (req, res) => {
   const tokenObj = await db.Token.findOne({
     where: {
       token,
-      userid: user.id,
+      userid,
     },
   });
 
-  console.log(tokenObj.expire);
-
-  if (!tokenObj || token !== tokenObj.token) {
+  if (!tokenObj) {
     return res.status(400).send("Invalid token");
   }
 
-  //TODO
+  if (tokenObj.expire.getTime() < Date.now()) {
+    return res.status(400).send("Token expired");
+  }
+
+  const hash = await bcrypt.hash(newPassoword, 10);
+
+  const user = await db.User.findByPk(userid);
+
+  user.set("password", hash);
+
+  await user.save();
+
+  await tokenObj.destroy();
+
+  res.send("password updated!");
 });
 
 const validateEmail = (email) => {
