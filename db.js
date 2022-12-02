@@ -1,9 +1,27 @@
 import { Sequelize, DataTypes } from "sequelize";
+import * as dotenv from "dotenv";
+dotenv.config();
 
-const sequelize = new Sequelize("eco", "root", "@Incorrect0811", {
+const { DB, UNAME, PASS } = process.env;
+
+const sequelize = new Sequelize(DB, UNAME, PASS, {
   host: "localhost",
   dialect: "mysql",
   sync: true,
+  // logging: false,
+  timezone: "+05:30",
+});
+
+//Models
+const Token = sequelize.define("Token", {
+  token: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+  },
+  expire: {
+    type: DataTypes.DATE,
+    defaultValue: new Date(Date.now() + 5 * 60000),
+  },
 });
 
 const Category = sequelize.define("Category", {
@@ -43,8 +61,6 @@ const Attachment = sequelize.define(
   },
   {}
 );
-
-const Tag = {};
 
 const Product = sequelize.define("Product", {
   id: {
@@ -118,16 +134,7 @@ const User = sequelize.define("User", {
   },
 });
 
-export default async function init() {
-  try {
-    await sequelize.authenticate();
-    console.log("Connection has been established successfully.");
-    // await sequelize.sync({ force: true });
-    // console.log("All models were synchronized successfully.");
-  } catch (error) {
-    console.error("Unable to connect to the database:", error);
-  }
-}
+// Relationships
 Category.belongsTo(Attachment, {
   foreignKey: "image",
 });
@@ -149,5 +156,28 @@ User.hasMany(Order, {
 Product.hasMany(OrderItem, {
   foreignKey: "productid",
 });
+User.hasMany(Token, {
+  foreignKey: "userid",
+});
 
-export { sequelize, Attachment, Category, OrderItem, Product, User, Order };
+export default async function init() {
+  try {
+    await sequelize.authenticate();
+    console.log("Connection has been established successfully.");
+    await sequelize.sync();
+    console.log("All models were synchronized successfully.");
+  } catch (error) {
+    console.error("Unable to connect to the database:", error);
+  }
+}
+
+export {
+  sequelize,
+  Attachment,
+  Category,
+  OrderItem,
+  Product,
+  User,
+  Order,
+  Token,
+};

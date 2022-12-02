@@ -8,6 +8,12 @@ app.use(auth);
 
 (async function () {
   await db.default();
+  await db.User.create({
+    username: "asdf",
+    password: "asdf",
+    email: "harsh@gmail.com",
+  });
+
   app.listen(3000, () => {
     console.log("Listening on port 3000");
   });
