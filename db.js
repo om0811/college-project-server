@@ -8,7 +8,7 @@ const sequelize = new Sequelize(DB, UNAME, PASS, {
   host: "localhost",
   dialect: "mysql",
   sync: true,
-  // logging: false,
+  logging: false,
   timezone: "+05:30",
 });
 
@@ -52,10 +52,7 @@ const Attachment = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    thumbnail: {
-      type: DataTypes.STRING,
-    },
-    original: {
+    name: {
       type: DataTypes.STRING,
     },
   },
@@ -109,9 +106,6 @@ const Order = sequelize.define("Order", {
   total: {
     type: DataTypes.INTEGER,
   },
-  tracking_number: {
-    type: DataTypes.STRING,
-  },
   shipping_fee: {
     type: DataTypes.INTEGER,
   },
@@ -130,6 +124,9 @@ const User = sequelize.define("User", {
     type: DataTypes.STRING,
   },
   email: {
+    type: DataTypes.STRING,
+  },
+  role: {
     type: DataTypes.STRING,
   },
 });
@@ -160,12 +157,16 @@ User.hasMany(Token, {
   foreignKey: "userid",
 });
 
-export default async function init() {
+export default async function init(sync) {
   try {
     await sequelize.authenticate();
     console.log("Connection has been established successfully.");
-    // await sequelize.sync();
-    // console.log("All models were synchronized successfully.");
+    if (sync) {
+      await sequelize.sync({
+        force: true,
+      });
+      console.log("All models were synchronized successfully.");
+    }
   } catch (error) {
     console.error("Unable to connect to the database:", error);
   }

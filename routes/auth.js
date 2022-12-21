@@ -14,6 +14,7 @@ app.post("/register", async (req, res) => {
       username,
       password: hash,
       email,
+      role: "user",
     });
   } catch (e) {
     return res.status(400).end(e.message);
@@ -47,12 +48,12 @@ app.post("/login", async (req, res) => {
     if (result) {
       const token = jwt.sign(
         { id: user.id, username: user.username },
-        "TODOSECRET",
+        process.env.JWT_SECRET,
         {
-          expiresIn: "20d",
+          expiresIn: "5d",
         }
       );
-      return res.status(200).send(token);
+      return res.cookie("auth_token", token).end();
     } else {
       return res.status(401).send("username or password is wrong");
     }
@@ -73,6 +74,7 @@ app.post("/forgot_password", async (req, res) => {
   res.status(200).send("Email Sent!");
 });
 
+//TODO: remove token after password reset and add token expiration in db
 app.post("/reset_password", async (req, res) => {
   const { token, userid } = req.query;
   const { newPassoword, reNewPassword } = req.body;
