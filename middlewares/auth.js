@@ -9,13 +9,15 @@ async function getUser(token) {
 
 export default (role) => {
   return async (req, res, next) => {
-    const token = req.headers["cookie"]?.split("=")[1];
+    console.log(req.headers);
+    const token = req.headers["auth_token"];
     if (!token) {
       res.status(401).send("Unauthorized");
       return;
     }
     const user = await getUser(token);
     if (user.role === role) {
+      req.user = user;
       next();
     } else {
       res.status(401).send("Unauthorized");

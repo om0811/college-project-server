@@ -1,17 +1,15 @@
 import express from "express";
 import * as db from "../db.js";
-import auth from "../middlewares/auth.js";
+import authMid from "../middlewares/auth.js";
 
 const app = express.Router();
-app.use(auth("admin"));
 
-app.post("/add_product", async (req, res) => {
+app.post("/add_product", authMid("admin"), async (req, res) => {
   const {
     name,
     price,
     description,
     slug,
-    quantity,
     sale_price,
     thumbid,
     categoryid,
@@ -23,7 +21,6 @@ app.post("/add_product", async (req, res) => {
     price,
     description,
     slug,
-    quantity,
     sale_price,
   });
 
@@ -43,21 +40,20 @@ app.post("/add_product", async (req, res) => {
   res.send("product has been added");
 });
 
-app.post("/delete_product", async (req, res) => {
+app.post("/delete_product", authMid("admin"), async (req, res) => {
   const { id } = req.body;
   const product = await db.Product.findByPk(id);
   await product.destroy();
   res.send("product has been deleted");
 });
 
-app.post("/update_product", async (req, res) => {
+app.post("/update_product", authMid("admin"), async (req, res) => {
   const {
     id,
     name,
     price,
     description,
     slug,
-    quantity,
     sale_price,
     thumbid,
     categoryid,
@@ -70,7 +66,6 @@ app.post("/update_product", async (req, res) => {
   product.price = price;
   product.description = description;
   product.slug = slug;
-  product.quantity = quantity;
   product.sale_price = sale_price;
 
   const category = await db.Category.findByPk(categoryid);

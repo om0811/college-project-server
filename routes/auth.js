@@ -53,7 +53,7 @@ app.post("/login", async (req, res) => {
           expiresIn: "5d",
         }
       );
-      return res.cookie("auth_token", token).end();
+      return res.setHeader("auth_token", token).end();
     } else {
       return res.status(401).send("username or password is wrong");
     }

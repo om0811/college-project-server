@@ -74,9 +74,6 @@ const Product = sequelize.define("Product", {
   price: {
     type: DataTypes.INTEGER,
   },
-  quantity: {
-    type: DataTypes.INTEGER,
-  },
   sale_price: {
     type: DataTypes.INTEGER,
   },
@@ -91,9 +88,15 @@ const OrderItem = sequelize.define("OrderItem", {
     primaryKey: true,
     autoIncrement: true,
   },
-
   quantity: {
     type: DataTypes.INTEGER,
+  },
+
+  size: {
+    type: DataTypes.STRING,
+  },
+  color: {
+    type: DataTypes.STRING,
   },
 });
 
