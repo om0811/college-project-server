@@ -24,6 +24,7 @@ app.post("/add_order", authMid("user"), async (req, res) => {
 
   const order = await db.Order.create({
     total,
+    status: "placed",
   });
 
   const orderItems = await Promise.all(
@@ -43,6 +44,26 @@ app.post("/add_order", authMid("user"), async (req, res) => {
   user.addOrder(order);
 
   res.send("order has been added");
+});
+
+app.delete("cancel_order/:id", authMid("user"), async (req, res) => {
+  const { id } = req.params;
+  const { user } = req;
+  const order = await db.Order.findByPk(id);
+
+  if (order.userid !== user.id) {
+    res.status(400).send("you are not allowed to cancel this order");
+    return;
+  }
+
+  if (order.status === "cancelled") {
+    res.status(400).send("order has already been cancelled");
+    return;
+  }
+
+  order.set("status", "cancelled");
+  await order.save();
+  res.send("order has been cancelled");
 });
 
 app.get("/get_orders", authMid("user"), async (req, res) => {
@@ -85,6 +106,26 @@ app.get("/get_orders", authMid("user"), async (req, res) => {
   );
 
   res.send(orderItems);
+});
+
+app.get("/get_all_orders", authMid("admin"), async (req, res) => {
+  const orders = await db.Order.findAll({
+    include: [
+      {
+        model: db.OrderItem,
+        include: [
+          {
+            model: db.Product,
+          },
+        ],
+      },
+      {
+        model: db.User,
+      },
+    ],
+  });
+
+  res.send(orders);
 });
 
 export default app;

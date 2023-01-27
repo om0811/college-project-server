@@ -74,7 +74,6 @@ app.post("/forgot_password", async (req, res) => {
   res.status(200).send("Email Sent!");
 });
 
-//TODO: remove token after password reset and add token expiration in db
 app.post("/reset_password", async (req, res) => {
   const { token, userid } = req.query;
   const { newPassoword, reNewPassword } = req.body;
@@ -95,6 +94,7 @@ app.post("/reset_password", async (req, res) => {
   }
 
   if (tokenObj.expire.getTime() < Date.now()) {
+    await tokenObj.destroy();
     return res.status(400).send("Token expired");
   }
 

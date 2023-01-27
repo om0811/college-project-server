@@ -109,8 +109,9 @@ const Order = sequelize.define("Order", {
   total: {
     type: DataTypes.INTEGER,
   },
-  shipping_fee: {
-    type: DataTypes.INTEGER,
+
+  status: {
+    type: DataTypes.STRING,
   },
 });
 
@@ -130,6 +131,12 @@ const User = sequelize.define("User", {
     type: DataTypes.STRING,
   },
   role: {
+    type: DataTypes.STRING,
+  },
+});
+
+const Feedback = sequelize.define("Feedback", {
+  text: {
     type: DataTypes.STRING,
   },
 });
@@ -159,6 +166,9 @@ Product.hasMany(OrderItem, {
 User.hasMany(Token, {
   foreignKey: "userid",
 });
+User.hasMany(Feedback, {
+  foreignKey: "userid",
+});
 
 export default async function init(sync) {
   try {
@@ -184,4 +194,5 @@ export {
   User,
   Order,
   Token,
+  Feedback,
 };

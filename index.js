@@ -5,6 +5,7 @@ import attachment from "./routes/attachment.js";
 import product from "./routes/product.js";
 import order from "./routes/order.js";
 import user from "./routes/user.js";
+import feedback from "./routes/feedback.js";
 import cors from "cors";
 
 const app = express();
@@ -21,6 +22,7 @@ app.use(attachment);
 app.use(product);
 app.use(order);
 app.use(user);
+app.use(feedback);
 
 await db.default();
 

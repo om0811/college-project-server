@@ -9,7 +9,6 @@ async function getUser(token) {
 
 export default (role) => {
   return async (req, res, next) => {
-    console.log(req.headers);
     const token = req.headers["auth_token"];
     if (!token) {
       res.status(401).send("Unauthorized");
