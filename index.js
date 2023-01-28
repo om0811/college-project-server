@@ -1,7 +1,6 @@
 import * as db from "./db.js";
 import express from "express";
 import auth from "./routes/auth.js";
-import attachment from "./routes/attachment.js";
 import product from "./routes/product.js";
 import order from "./routes/order.js";
 import user from "./routes/user.js";
@@ -18,7 +17,6 @@ app.use(
 app.use(express.json());
 app.use(express.static("public"));
 app.use(auth);
-app.use(attachment);
 app.use(product);
 app.use(order);
 app.use(user);

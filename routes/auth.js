@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 
 const app = express.Router();
 
-app.post("/register", async (req, res) => {
+app.post("/signup", async (req, res) => {
   const { username, password, email } = req.body;
   const hash = await bcrypt.hash(password, 10);
   let user;
@@ -27,7 +27,6 @@ app.post("/register", async (req, res) => {
 app.post("/login", async (req, res) => {
   let { username, password } = req.body;
   let user;
-
   if (validateEmail(username)) {
     user = await db.User.findOne({
       where: {

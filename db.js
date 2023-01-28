@@ -52,7 +52,7 @@ const Attachment = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    name: {
+    url: {
       type: DataTypes.STRING,
     },
   },
@@ -78,6 +78,9 @@ const Product = sequelize.define("Product", {
     type: DataTypes.INTEGER,
   },
   description: {
+    type: DataTypes.STRING,
+  },
+  thumbnail: {
     type: DataTypes.STRING,
   },
 });
@@ -142,12 +145,7 @@ const Feedback = sequelize.define("Feedback", {
 });
 
 // Relationships
-Category.belongsTo(Attachment, {
-  foreignKey: "image",
-});
-Product.belongsTo(Attachment, {
-  foreignKey: "image",
-});
+
 Product.belongsTo(Category, {
   foreignKey: "categoryid",
 });
