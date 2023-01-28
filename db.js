@@ -139,7 +139,7 @@ const User = sequelize.define("User", {
 });
 
 const Feedback = sequelize.define("Feedback", {
-  text: {
+  feedback: {
     type: DataTypes.STRING,
   },
 });

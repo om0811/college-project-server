@@ -9,6 +9,7 @@ app.post("/signup", async (req, res) => {
   const { username, password, email } = req.body;
   const hash = await bcrypt.hash(password, 10);
   let user;
+
   try {
     user = await db.User.create({
       username,

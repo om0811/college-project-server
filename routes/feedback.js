@@ -7,10 +7,14 @@ const app = express.Router();
 app.post("/create_feedback", authMid("user"), async (req, res) => {
   const { user } = req;
   const { feedback } = req.body;
-  await db.Feedback.create({
+
+  if (!feedback) return res.status(400).send("feedback is required");
+
+  const feedbackObj = await db.Feedback.create({
     feedback,
-    userid: user.id,
   });
+
+  user.addFeedback(feedbackObj);
   res.send("feedback has been created");
 });
 
