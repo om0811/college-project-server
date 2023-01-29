@@ -33,15 +33,6 @@ const Category = sequelize.define("Category", {
   name: {
     type: DataTypes.STRING,
   },
-  slug: {
-    type: DataTypes.STRING,
-  },
-  details: {
-    type: DataTypes.STRING,
-  },
-  productCount: {
-    type: DataTypes.INTEGER,
-  },
 });
 
 const Attachment = sequelize.define(
@@ -74,9 +65,8 @@ const Product = sequelize.define("Product", {
   price: {
     type: DataTypes.INTEGER,
   },
-
   description: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
   },
   thumbnail: {
     type: DataTypes.STRING,

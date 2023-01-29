@@ -27,6 +27,29 @@ const formMid = (req, res, next) => {
   });
 };
 
+app.get("/product/:slug", async (req, res) => {
+  const { slug } = req.params;
+  const product = await db.Product.findOne({
+    where: {
+      slug,
+    },
+    include: [
+      {
+        model: db.Category,
+        as: "category",
+      },
+      {
+        model: db.Attachment,
+        as: "attachments",
+      },
+    ],
+  });
+
+  if (!product) return res.status(404).send("product not found");
+
+  res.send(product);
+});
+
 app.post("/add_product", authMid("admin"), formMid, async (req, res) => {
   const { name, price, description, slug, sale_price, category } = req.body;
 
@@ -36,7 +59,6 @@ app.post("/add_product", authMid("admin"), formMid, async (req, res) => {
     price,
     description,
     slug,
-    sale_price,
     thumbnail,
   });
 
