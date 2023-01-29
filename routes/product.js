@@ -1,49 +1,36 @@
 import express from "express";
 import * as db from "../db.js";
 import authMid from "../middlewares/auth.js";
-import multiparty from "multiparty";
+import formidable from "formidable";
 import path from "path";
 
 const app = express.Router();
 
 const formMid = (req, res, next) => {
-  const form = new multiparty.Form({
-    uploadDir: path.join(process.cwd(), "public"),
+  const form = formidable({
+    multiples: true,
+    filename: function (name, filename) {
+      return name + filename;
+    },
+    keepExtensions: true,
+    uploadDir: path.join(process.cwd(), "/public"),
   });
-  form.parse(req, async (err, fields, files) => {
+
+  form.parse(req, (err, fields, files) => {
     if (err) {
-      res.status(500).send("Error parsing form");
+      res.end(err.message);
       return;
     }
-
     req.body = fields;
     req.files = files;
-
     next();
   });
 };
 
 app.post("/add_product", authMid("admin"), formMid, async (req, res) => {
-  const thumbnail = path.basename(req.files.thumbnail[0].path);
-  let { name, price, description, slug, sale_price, category } = req.body;
+  const { name, price, description, slug, sale_price, category } = req.body;
 
-  name = name[0];
-  price = price[0];
-  description = description[0];
-  slug = slug[0];
-  sale_price = sale_price[0];
-  category = category[0];
-
-  const attachments = await Promise.all(
-    req.files.attachments.map(async (attachment) => {
-      const filename = path.basename(attachment.path);
-      const attachmentObj = await db.Attachment.create({
-        url: filename,
-      });
-      return attachmentObj;
-    })
-  );
-
+  const thumbnail = req.files.thumbnail.originalFilename;
   const product = await db.Product.create({
     name,
     price,
@@ -60,6 +47,16 @@ app.post("/add_product", authMid("admin"), formMid, async (req, res) => {
   });
 
   product.setCategory(categoryObj);
+
+  const attachments = await Promise.all(
+    req.files.attachments.map(async (attachment) => {
+      const filename = attachment.originalFilename;
+      const attachmentObj = await db.Attachment.create({
+        url: filename,
+      });
+      return attachmentObj;
+    })
+  );
 
   if (attachments.length > 0) product.addAttachment(attachments);
 

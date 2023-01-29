@@ -10,4 +10,9 @@ app.get("/get_users", authMid("admin"), async (req, res) => {
   res.send(users.map((user) => user.toJSON()));
 });
 
+app.get("/me", authMid("user"), async (req, res) => {
+  const { user } = req;
+  res.send(user.toJSON());
+});
+
 export default app;
