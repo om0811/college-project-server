@@ -74,9 +74,7 @@ const Product = sequelize.define("Product", {
   price: {
     type: DataTypes.INTEGER,
   },
-  sale_price: {
-    type: DataTypes.INTEGER,
-  },
+
   description: {
     type: DataTypes.STRING,
   },
