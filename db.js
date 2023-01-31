@@ -82,11 +82,7 @@ const OrderItem = sequelize.define("OrderItem", {
   quantity: {
     type: DataTypes.INTEGER,
   },
-
   size: {
-    type: DataTypes.STRING,
-  },
-  color: {
     type: DataTypes.STRING,
   },
 });

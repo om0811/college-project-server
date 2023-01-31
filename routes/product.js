@@ -30,17 +30,16 @@ const formMid = (req, res, next) => {
 app.get("/product/:slug", async (req, res) => {
   const { slug } = req.params;
   const product = await db.Product.findOne({
-    where: {
-      slug,
-    },
+    attributes: ["id", "name", "price", "description", "thumbnail", "slug"],
+    where: isNaN(parseInt(slug)) ? { slug } : { id: slug },
     include: [
       {
         model: db.Category,
-        as: "category",
+        attributes: ["name"],
       },
       {
         model: db.Attachment,
-        as: "attachments",
+        attributes: ["id", "url"],
       },
     ],
   });
@@ -48,6 +47,18 @@ app.get("/product/:slug", async (req, res) => {
   if (!product) return res.status(404).send("product not found");
 
   res.send(product);
+});
+
+//TODO: add sort products by number of order placed
+app.get("/trending_products", async (req, res) => {
+  const products = await db.Product.findAll({
+    attributes: ["id", "name", "price", "description", "thumbnail", "slug"],
+
+    order: [["id", "DESC"]],
+    limit: 4,
+  });
+
+  res.send(products);
 });
 
 app.post("/add_product", authMid("admin"), formMid, async (req, res) => {

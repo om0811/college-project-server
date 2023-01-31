@@ -19,7 +19,7 @@ app.post("/add_order", authMid("user"), async (req, res) => {
   );
 
   const total = productsWithDetails.reduce((acc, product) => {
-    return acc + product.model.sale_price * product.quantity;
+    return acc + product.model.price * product.quantity;
   }, 0);
 
   const order = await db.Order.create({
@@ -32,7 +32,6 @@ app.post("/add_order", authMid("user"), async (req, res) => {
       const orderItem = await db.OrderItem.create({
         quantity: product.quantity,
         size: product.size,
-        color: product.color,
       });
       product.model.addOrderItem(orderItem);
       return orderItem;
@@ -43,7 +42,10 @@ app.post("/add_order", authMid("user"), async (req, res) => {
 
   user.addOrder(order);
 
-  res.send("order has been added");
+  res.json({
+    id: order.id,
+    message: "order has been placed",
+  });
 });
 
 app.delete("cancel_order/:id", authMid("user"), async (req, res) => {
