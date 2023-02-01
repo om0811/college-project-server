@@ -18,13 +18,14 @@ app.post("/add_order", authMid("user"), async (req, res) => {
     })
   );
 
-  const total = productsWithDetails.reduce((acc, product) => {
-    return acc + product.model.price * product.quantity;
-  }, 0);
+  const total =
+    productsWithDetails.reduce((acc, product) => {
+      return acc + product.model.price * product.quantity;
+    }, 0) + 70;
 
   const order = await db.Order.create({
     total,
-    status: "placed",
+    status: "Placed",
   });
 
   const orderItems = await Promise.all(
@@ -48,10 +49,15 @@ app.post("/add_order", authMid("user"), async (req, res) => {
   });
 });
 
-app.delete("cancel_order/:id", authMid("user"), async (req, res) => {
-  const { id } = req.params;
+app.delete("/cancel_order/", authMid("user"), async (req, res) => {
+  const { id } = req.body;
   const { user } = req;
   const order = await db.Order.findByPk(id);
+
+  if (!order) {
+    res.status(400).send("order not found");
+    return;
+  }
 
   if (order.userid !== user.id) {
     res.status(400).send("you are not allowed to cancel this order");
@@ -63,9 +69,9 @@ app.delete("cancel_order/:id", authMid("user"), async (req, res) => {
     return;
   }
 
-  order.set("status", "cancelled");
+  order.set("status", "Cancelled");
   await order.save();
-  res.send("order has been cancelled");
+  res.json({ message: "order has been cancelled" });
 });
 
 app.get("/get_orders", authMid("user"), async (req, res) => {
@@ -75,6 +81,7 @@ app.get("/get_orders", authMid("user"), async (req, res) => {
     where: {
       userid: user.id,
     },
+    attributes: ["id", "total", "status", "createdAt"],
   });
 
   const orderItems = await Promise.all(
@@ -83,6 +90,7 @@ app.get("/get_orders", authMid("user"), async (req, res) => {
         where: {
           orderid: order.id,
         },
+        attributes: ["id", "quantity", "size", "productid"],
       });
 
       const products = await Promise.all(
@@ -91,11 +99,12 @@ app.get("/get_orders", authMid("user"), async (req, res) => {
             where: {
               id: orderItem.productid,
             },
+            attributes: ["id", "name", "price", "thumbnail", "slug"],
           });
 
           return {
             ...orderItem.toJSON(),
-            product,
+            ...product.toJSON(),
           };
         })
       );

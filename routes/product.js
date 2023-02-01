@@ -3,6 +3,7 @@ import * as db from "../db.js";
 import authMid from "../middlewares/auth.js";
 import formidable from "formidable";
 import path from "path";
+import { literal, Op } from "sequelize";
 
 const app = express.Router();
 
@@ -49,6 +50,39 @@ app.get("/product/:slug", async (req, res) => {
   res.send(product);
 });
 
+app.get("/products", async (req, res) => {
+  const { category, price, search_query } = req.query;
+
+  const products = await db.Product.findAll({
+    attributes: ["id", "name", "price", "description", "thumbnail", "slug"],
+    where: [
+      { price: { [Op.lte]: price ? price : 100000 } },
+      search_query
+        ? literal(
+            `MATCH(Product.name, Product.description) AGAINST('${search_query}')`
+          )
+        : null,
+    ],
+    include: [
+      {
+        model: db.Category,
+        attributes: ["name"],
+        where: {
+          name: category
+            ? {
+                [Op.eq]: category,
+              }
+            : {
+                [Op.ne]: null,
+              },
+        },
+      },
+    ],
+  });
+
+  res.send(products);
+});
+
 //TODO: add sort products by number of order placed
 app.get("/trending_products", async (req, res) => {
   const products = await db.Product.findAll({
@@ -62,7 +96,7 @@ app.get("/trending_products", async (req, res) => {
 });
 
 app.post("/add_product", authMid("admin"), formMid, async (req, res) => {
-  const { name, price, description, slug, sale_price, category } = req.body;
+  const { name, price, description, slug, category } = req.body;
 
   const thumbnail = req.files.thumbnail.originalFilename;
   const product = await db.Product.create({

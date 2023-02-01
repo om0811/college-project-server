@@ -122,6 +122,41 @@ const User = sequelize.define("User", {
   },
 });
 
+const UserInfo = sequelize.define("UserInfo", {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+  },
+  phone: {
+    type: DataTypes.STRING,
+  },
+  address: {
+    type: DataTypes.STRING,
+  },
+  city: {
+    type: DataTypes.STRING,
+  },
+  state: {
+    type: DataTypes.STRING,
+  },
+  postalcode: {
+    type: DataTypes.STRING,
+  },
+  cardnumber: {
+    type: DataTypes.STRING,
+  },
+  expirydate: {
+    type: DataTypes.STRING,
+  },
+  cvv: {
+    type: DataTypes.STRING,
+  },
+});
+
 const Feedback = sequelize.define("Feedback", {
   feedback: {
     type: DataTypes.STRING,
@@ -151,6 +186,9 @@ User.hasMany(Token, {
 User.hasMany(Feedback, {
   foreignKey: "userid",
 });
+User.hasOne(UserInfo, {
+  foreignKey: "userid",
+});
 
 export default async function init(sync) {
   try {
@@ -160,6 +198,9 @@ export default async function init(sync) {
       await sequelize.sync({
         force: true,
       });
+      await sequelize.query(
+        `CREATE FULLTEXT INDEX namedesc ON Products(name,description)`
+      );
       console.log("All models were synchronized successfully.");
     }
   } catch (error) {
@@ -177,4 +218,5 @@ export {
   Order,
   Token,
   Feedback,
+  UserInfo,
 };

@@ -10,6 +10,22 @@ app.post("/signup", async (req, res) => {
   const hash = await bcrypt.hash(password, 10);
   let user;
 
+  const userExists = await db.User.findOne({
+    where: {
+      username,
+    },
+  });
+
+  const emailExists = await db.User.findOne({
+    where: {
+      email,
+    },
+  });
+
+  if (userExists) return res.status(400).send("username already exists");
+
+  if (emailExists) return res.status(400).send("email already exists");
+
   try {
     user = await db.User.create({
       username,
