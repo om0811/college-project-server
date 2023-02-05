@@ -95,6 +95,16 @@ app.get("/trending_products", async (req, res) => {
   res.send(products);
 });
 
+app.get("/related_products", async (req, res) => {
+  const products = await db.Product.findAll({
+    order: literal("rand()"),
+    limit: 4,
+    attributes: ["id", "name", "price", "description", "thumbnail", "slug"],
+  });
+
+  res.send(products);
+});
+
 app.post("/add_product", authMid("admin"), formMid, async (req, res) => {
   const { name, price, description, slug, category } = req.body;
 

@@ -150,7 +150,7 @@ const UserInfo = sequelize.define("UserInfo", {
     type: DataTypes.STRING,
   },
   expirydate: {
-    type: DataTypes.STRING,
+    type: DataTypes.DATEONLY,
   },
   cvv: {
     type: DataTypes.STRING,

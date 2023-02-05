@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import * as db from "../db.js";
 import jwt from "jsonwebtoken";
+import queryString from "query-string";
 
 const app = express.Router();
 
@@ -86,18 +87,18 @@ app.post("/forgot_password", async (req, res) => {
   }
   const token = await db.Token.create();
   await user.addToken(token);
+  const json = token.toJSON();
+  console.log(
+    "Forgot password link generated",
+    "http://localhost:5173/resetpassword?" +
+      queryString.stringify({ token: json.token, userid: user.id })
+  );
   //TODO: send mail with token and userid
-  res.status(200).send("Email Sent!");
+  res.status(200).json({ message: "Email sent" });
 });
 
 app.post("/reset_password", async (req, res) => {
-  const { token, userid } = req.query;
-  const { newPassoword, reNewPassword } = req.body;
-
-  if (newPassoword !== reNewPassword) {
-    return res.status(400).send("Passwords dont match");
-  }
-
+  const { password, token, userid } = req.body;
   const tokenObj = await db.Token.findOne({
     where: {
       token,
@@ -114,7 +115,7 @@ app.post("/reset_password", async (req, res) => {
     return res.status(400).send("Token expired");
   }
 
-  const hash = await bcrypt.hash(newPassoword, 10);
+  const hash = await bcrypt.hash(password, 10);
 
   const user = await db.User.findByPk(userid);
 

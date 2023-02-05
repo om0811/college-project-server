@@ -27,7 +27,6 @@ app.get("/is_user_info_filled", authMid("user"), async (req, res) => {
 app.post("/update_user_info", authMid("user"), async (req, res) => {
   const { user } = req;
   const {
-    email,
     name,
     phone,
     cardnumber,
@@ -48,6 +47,14 @@ app.post("/update_user_info", authMid("user"), async (req, res) => {
     userInfo.name = name;
     userInfo.address = address;
     userInfo.phone = phone;
+    userInfo.cardnumber = cardnumber;
+    userInfo.expirydate = expirydate;
+    userInfo.cvv = cvv;
+    userInfo.address = address;
+    userInfo.city = city;
+    userInfo.state = state;
+    userInfo.postalcode = postalcode;
+
     await userInfo.save();
     res.send(userInfo.toJSON());
   } else {
@@ -55,15 +62,34 @@ app.post("/update_user_info", authMid("user"), async (req, res) => {
       name,
       address,
       phone,
+      cardnumber,
+      expirydate,
+      cvv,
+      address,
+      city,
+      state,
+      postalcode,
     });
     await user.setUserInfo(userInfo);
     res.send(userInfo.toJSON());
   }
 });
 
-app.get("/me", authMid("user"), async (req, res) => {
+app.get("/get_user_info", authMid("user"), async (req, res) => {
   const { user } = req;
-  res.send(user.toJSON());
+
+  const userInfo = await db.UserInfo.findOne({
+    where: {
+      userid: user.id,
+    },
+    attributes: {
+      exclude: ["userid", "id"],
+    },
+  });
+
+  if (!userInfo) return res.status(404).send("Not found");
+
+  res.send(userInfo.toJSON());
 });
 
 export default app;
