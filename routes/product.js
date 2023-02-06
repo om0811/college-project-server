@@ -83,6 +83,20 @@ app.get("/products", async (req, res) => {
   res.send(products);
 });
 
+app.get("/get_products", authMid("admin"), async (req, res) => {
+  const products = await db.Product.findAll({
+    attributes: ["id", "name", "price", "thumbnail", "slug"],
+    include: [
+      {
+        model: db.Category,
+        attributes: ["name"],
+      },
+    ],
+  });
+
+  res.send(products);
+});
+
 //TODO: add sort products by number of order placed
 app.get("/trending_products", async (req, res) => {
   const products = await db.Product.findAll({

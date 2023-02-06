@@ -5,9 +5,26 @@ import * as db from "../db.js";
 const app = express.Router();
 
 app.get("/get_users", authMid("admin"), async (req, res) => {
-  const users = await db.User.findAll();
+  const users = await db.User.findAll({
+    attributes: ["id", "username", "email", "role", "isBlocked"],
+  });
 
   res.send(users.map((user) => user.toJSON()));
+});
+
+app.post("/block_unblock_user", authMid("admin"), async (req, res) => {
+  const { id, isBlocked } = req.body;
+  const user = await db.User.findOne({
+    where: {
+      id,
+    },
+  });
+
+  if (!user) return res.status(404).send("Not found");
+  if (user.role === "admin") return res.status(400).send("Can't block admin");
+  user.isBlocked = isBlocked;
+  await user.save();
+  res.send(user.toJSON());
 });
 
 app.get("/is_user_info_filled", authMid("user"), async (req, res) => {

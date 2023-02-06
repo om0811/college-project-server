@@ -120,6 +120,10 @@ const User = sequelize.define("User", {
   role: {
     type: DataTypes.STRING,
   },
+  isBlocked: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
 });
 
 const UserInfo = sequelize.define("UserInfo", {

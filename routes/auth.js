@@ -60,6 +60,8 @@ app.post("/login", async (req, res) => {
   }
 
   if (user) {
+    if (user.isBlocked) return res.status(401).send("user is blocked");
+
     const hash = user.password;
     const result = await bcrypt.compare(password, hash);
     if (result) {
