@@ -69,7 +69,7 @@ app.delete("/cancel_order/", authMid("user"), async (req, res) => {
     return;
   }
 
-  order.set("status", "Cancelled");
+  order.set("status", "cancelled");
   await order.save();
   res.json({ message: "order has been cancelled" });
 });

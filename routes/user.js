@@ -104,7 +104,9 @@ app.get("/get_user_info", authMid("user"), async (req, res) => {
     },
   });
 
-  if (!userInfo) return res.status(404).send("Not found");
+  if (!userInfo) {
+    return res.status(404).send("Not found");
+  }
 
   res.send(userInfo.toJSON());
 });
