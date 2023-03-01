@@ -19,16 +19,33 @@ app.post("/create_feedback", authMid("user"), async (req, res) => {
 });
 
 app.get("/get_feedbacks", authMid("admin"), async (req, res) => {
-  const feedbacks = await db.Feedback.findAll({
-    attributes: ["id", "feedback"],
-    include: [
-      {
-        model: db.User,
-        attributes: ["id", "username"],
-      },
-    ],
-  });
-  res.send(feedbacks);
+  const feedbacks = await db.Feedback.findAll({});
+
+  const feedbackWithUser = await Promise.all(
+    feedbacks.map(async (feedback) => {
+      const user = await db.User.findOne({
+        where: { id: feedback.userid },
+        attributes: ["username", "email", "createdAt"],
+        include: [
+          {
+            model: db.UserInfo,
+            attributes: ["name"],
+          },
+        ],
+      });
+
+      return {
+        id: feedback.id,
+        feedback: feedback.feedback,
+        username: user.username,
+        name: user.UserInfo.name,
+        email: user.email,
+        createdAt: user.createdAt,
+      };
+    })
+  );
+
+  res.send(feedbackWithUser);
 });
 
 export default app;

@@ -120,23 +120,60 @@ app.get("/get_orders", authMid("user"), async (req, res) => {
 });
 
 app.get("/get_all_orders", authMid("admin"), async (req, res) => {
-  const orders = await db.Order.findAll({
-    include: [
-      {
-        model: db.OrderItem,
-        include: [
-          {
-            model: db.Product,
-          },
-        ],
-      },
-      {
-        model: db.User,
-      },
-    ],
+  const orders = await db.Order.findAll({});
+
+  const orderWithUser = await Promise.all(
+    orders.map(async (order) => {
+      const user = await db.User.findOne({
+        where: {
+          id: order.userid,
+        },
+        attributes: ["username"],
+      });
+
+      return {
+        ...order.toJSON(),
+        user,
+      };
+    })
+  );
+
+  res.send(orderWithUser);
+});
+
+app.get("/get_order_items/:id", authMid("admin"), async (req, res) => {
+  const { id } = req.params;
+  const order = await db.Order.findByPk(id);
+
+  if (!order) {
+    res.status(400).send("order not found");
+    return;
+  }
+
+  const orderItems = await db.OrderItem.findAll({
+    where: {
+      orderid: order.id,
+    },
+    attributes: ["id", "quantity", "size", "productid"],
   });
 
-  res.send(orders);
+  const products = await Promise.all(
+    orderItems.map(async (orderItem) => {
+      const product = await db.Product.findOne({
+        where: {
+          id: orderItem.productid,
+        },
+        attributes: ["id", "name", "price", "thumbnail", "slug"],
+      });
+
+      return {
+        ...orderItem.toJSON(),
+        ...product.toJSON(),
+      };
+    })
+  );
+
+  res.json(products);
 });
 
 export default app;
